@@ -7,23 +7,25 @@ class MoviesController < ApplicationController
   end
 
   def index
-  @all_ratings = Movie.ratings
+    @all_ratings = Movie.ratings
    
-  @checked = Hash[@all_ratings.map {|x| [x, true]}]
+    @checked = Hash[@all_ratings.map {|x| [x, true]}]
 
-  if params[:ratings]
-    wanted_ratings = params[:ratings].keys
-    session[:ratings] = params[:ratings]
-    @checked = params[:ratings]
-    @checked.each do |val|
-    	#{val} = true
-    end
+    if params[:ratings]
+      wanted_ratings = params[:ratings].keys
+      session[:ratings] = params[:ratings]
+      @checked = params[:ratings]
+      @checked.each do |val|
+      	#{val} = true
+      end
   elsif session[:ratings]
-    wanted_ratings = session[:ratings].keys
-    @checked = session[:ratings]
-    @checked.each do |val|
-        #{val} = true
-    end
+    ratings = session[:ratings]
+    redirect_to :action => :index, :ratings => ratings
+    #wanted_ratings = session[:ratings].keys
+    #@checked = session[:ratings]
+    #@checked.each do |val|
+    #    #{val} = true
+    #end
   else
     wanted_ratings = @all_ratings
   end
