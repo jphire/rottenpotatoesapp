@@ -7,31 +7,49 @@ class MoviesController < ApplicationController
   end
 
   def index
-	@all_ratings = Movie.ratings
+  @all_ratings = Movie.ratings
+   
+  @checked = Hash[@all_ratings.map {|x| [x, true]}]
 
-	@checked = Hash[@all_ratings.map {|x| [x, false]}]
+  if params[:ratings]
+    wanted_ratings = params[:ratings].keys
+    session[:ratings] = params[:ratings]
+    @checked = params[:ratings]
+    @checked.each do |val|
+    	#{val} = true
+    end
+  elsif session[:ratings]
+    wanted_ratings = session[:ratings].keys
+    @checked = session[:ratings]
+    @checked.each do |val|
+        #{val} = true
+    end
+  else
+    wanted_ratings = @all_ratings
+  end
 
-	if params[:ratings]
-	  wanted_ratings = params[:ratings].keys
-	  @checked = params[:ratings]
-	  @checked.each do |val|
-		#{val} = true
-	  end
-	else
-	  wanted_ratings = @all_ratings
-	end
     if params[:link_name] == 'release_date'
-	@movies = Movie.find(:all, :conditions => ["rating IN (?)", wanted_ratings], :order => 'release_date')
-	@release_date = 'hilite'
-	@title = ''
+      @movies = Movie.find(:all, :conditions => ["rating IN (?)", wanted_ratings], :order => 'release_date')
+      @release_date = 'hilite'
+      session['release_date'] = 'hilite'
+      session['order'] = 'release_date'
+      @title = ''
+      session['title'] = ''
     elsif params[:link_name] == 'title'
-	@title = 'hilite'
-	@release_date = ''
-	@movies = Movie.find(:all, :conditions => ["rating IN (?)", wanted_ratings], :order => 'title')
+      @title = 'hilite'
+      session['title'] = 'hilite'
+      session['order'] = 'title'
+      @release_date = ''
+      session['release_date'] = ''
+      @movies = Movie.find(:all, :conditions => ["rating IN (?)", wanted_ratings], :order => 'title')
     else
-	@title = ''
-	@release_date = ''
-	@movies = Movie.where(:rating => wanted_ratings)
+      @title = ''
+      @release_date = ''
+      if session['order']
+        @movies = Movie.find(:all, :conditions => ["rating IN (?)", wanted_ratings], :order => session['order'])
+      else
+      	@movies = Movie.where(:rating => wanted_ratings)
+      end
     end
   end
 
