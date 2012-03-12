@@ -7,18 +7,31 @@ class MoviesController < ApplicationController
   end
 
   def index
+	@all_ratings = Movie.ratings
+
+	@checked = Hash[@all_ratings.map {|x| [x, false]}]
+
+	if params[:ratings]
+	  wanted_ratings = params[:ratings].keys
+	  @checked = params[:ratings]
+	  @checked.each do |val|
+		#{val} = true
+	  end
+	else
+	  wanted_ratings = @all_ratings
+	end
     if params[:link_name] == 'release_date'
-	@movies = Movie.find(:all, :order => 'release_date')
+	@movies = Movie.find(:all, :conditions => ["rating IN (?)", wanted_ratings], :order => 'release_date')
 	@release_date = 'hilite'
 	@title = ''
     elsif params[:link_name] == 'title'
 	@title = 'hilite'
 	@release_date = ''
-	@movies = Movie.find(:all, :order => 'title')
+	@movies = Movie.find(:all, :conditions => ["rating IN (?)", wanted_ratings], :order => 'title')
     else
 	@title = ''
 	@release_date = ''
-	@movies = Movie.all
+	@movies = Movie.where(:rating => wanted_ratings)
     end
   end
 
